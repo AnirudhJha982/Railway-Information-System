@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🚆 Railway Assistant</h1>
+        <p>Smart Railway Information System</p>
+    </header>
+
+    <form id="pnrForm" method="POST">
+        <input
+            type="text"
+            id="pnr"
+            name="pnr"
+            maxlength="10"
+            minlength="10"
+            pattern="[0-9]{10}"
+            placeholder="Enter 10-digit PNR Number"
+            required>
+        <div class="buttons">
+            <button type="submit" id="checkBtn">
+                🔍 Check Status
+            </button>
+            <button type="button" onclick="toggleDarkMode()">
+                🌙 Dark Mode
+            </button>
+            <button type="button" onclick="showHistory()">
+                📜 Search History
+            </button>
+            <button
+                type="button"
+                class="secondary"
+                onclick="clearForm()">
+                🗑 Clear
+            </button>
+        </div>
+    </form>
+    <div id="loader" class="loader">
+        <div class="spinner"></div>
+        <p>Fetching PNR Status...</p>
+    </div>
+    {% if error %}
+    <div class="error">
+        {{ error }}
+    </div>
+    {% endif %}
+    {% if result %}
+    <div class="card fade" id="ticket">
+        <div class="ticketHeader">
+            <h2>{{ result.TrainName }}</h2>
+            <span class="badge">
+                {{ result.Class }}
+            </span>
+        </div>
+        <div class="grid">
+            <div>
+                <h4>Train Number</h4>
+                <p>{{ result.TrainNo }}</p>
+            </div>
+            <div>
+                <h4>Journey Date</h4>
+                <p>{{ result.Doj }}</p>
+            </div>
+            <div>
+                <h4>From</h4>
+                <p>{{ result.SourceName }}</p>
+            </div>
+            <div>
+                <h4>To</h4>
+                <p>{{ result.DestinationName }}</p>
+            </div>
+            <div>
+                <h4>Boarding</h4>
+                <p>{{ result.BoardingStationName }}</p>
+            </div>
+            <div>
+                <h4>Reservation Upto</h4>
+                <p>{{ result.ReservationUptoName }}</p>
+            </div>
+            <div>
+                <h4>Departure</h4>
+                <p>{{ result.DepartureTime }}</p>
+            </div>
+            <div>
+                <h4>Arrival</h4>
+                <p>{{ result.ArrivalTime }}</p>
+            </div>
+            <div>
+                <h4>Platform</h4>
+                <p>{{ result.ExpectedPlatformNo }}</p>
+            </div>
+            <div>
+                <h4>Duration</h4>
+                <p>{{ result.Duration }}</p>
+            </div>
+            <div>
+                <h4>Quota</h4>
+                <p>{{ result.Quota }}</p>
+            </div>
+            <div>
+                <h4>Fare</h4>
+                <p>₹{{ result.TicketFare }}</p>
+            </div>
+        </div>
+        <hr>
+        <h3>Passenger Details</h3>
+        {% for p in result.PassengerStatus %}
+        <div class="passengerCard">
+            <div>
+                <strong>Booking Status</strong>
+                <p>{{ p.BookingStatus }}</p>
+            </div>
+            <div>
+                <strong>Current Status</strong>
+                {% if p.CurrentStatus == "CNF" %}
+                <span class="status confirmed">
+                    {{ p.CurrentStatus }}
+                </span>
+                {% elif "RAC" in p.CurrentStatus %}
+                <span class="status rac">
+                    {{ p.CurrentStatus }}
+                </span>
+                {% else %}
+                <span class="status waiting">
+                    {{ p.CurrentStatus }}
+                </span>
+                {% endif %}
+            </div>
+            <div>
+                <strong>Berth</strong>
+                <p>{{ p.Berth }}</p>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="actions">
+            <button
+                type="button"
+                onclick="printTicket()">
+                🖨 Print Ticket
+            </button>
+            <button
+                type="button"
+                onclick="downloadPDF()">
+                📄 Download PDF
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
